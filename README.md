@@ -1,1 +1,1 @@
-# Degrees of Wikipedia
+# Wikipedia Degrees of Separation
