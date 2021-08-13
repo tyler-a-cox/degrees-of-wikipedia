@@ -1,1 +1,1 @@
-# Wiki-Bot
+# Degrees of Wikipedia
