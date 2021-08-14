@@ -4,7 +4,7 @@
 
 from setuptools import setup, find_packages
 
-requirements = ["cmasher", "twython", "numpy", "matplotlib", "scipy"]
+requirements = ["asyncio", "aiohttp", "numpy"]
 test_requirements = requirements
 
 setup(

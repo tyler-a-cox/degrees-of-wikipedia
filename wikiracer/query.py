@@ -18,6 +18,12 @@ regex = re.compile(
 )
 
 
+def is_valid_wiki(url: str) -> bool:
+    """
+    """
+    return
+
+
 def is_valid_url(url: str) -> bool:
     """
     """
