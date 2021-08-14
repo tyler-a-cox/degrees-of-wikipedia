@@ -1,3 +1,5 @@
+import sys
+import asyncio
 from queue import Queue
 from .query import request
 from .fetch import Session
