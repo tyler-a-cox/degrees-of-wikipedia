@@ -4,6 +4,7 @@ import asyncio
 import aiohttp
 import wikipedia
 
+RANDOM_URL = "https://en.wikipedia.org/wiki/Special:Random"
 BASE_URL = "https://en.wikipedia.org/w/api.php?"
 WIKI_URL = "https://en.wikipedia/wiki/"
 

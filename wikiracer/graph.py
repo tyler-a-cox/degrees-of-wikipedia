@@ -10,9 +10,9 @@ class Graph:
     A Wikipedia page and its outlinks stored as a graph.
     """
 
-    def __init__(self, is_source=True):
-        self.graph = {}  # stores links for all topics
-        self.fetcher = Session()  # queue up wiki_requests
+    def __init__(self, is_source: bool = True):
+        self.graph = {}
+        self.worker = Session()
         self.to_visit_start = asyncio.Queue()
         self.to_visit_end = asyncio.Queue()
         self.came_from_start = {}
@@ -58,7 +58,6 @@ class Graph:
         # if current topic is found in the opposing topic's visited,
         # then path exists and must be traced back on both sides to return
         if cur in dest_cf:
-            print(is_source)
             path1 = self.find_path(came_from, cur)
             path2 = self.find_path(dest_cf, cur)
 
@@ -82,10 +81,8 @@ class Graph:
             sys.exit(0)
 
         if cur not in self.graph:
-            # add current topic to worker's to_fetch queue
-            await self.fetcher.producer(cur, self.queue_links, depth, is_source)
+            await self.worker.producer(cur, self.queue_links, depth, is_source)
         else:
-            # otherwise, add cur's children to to_visit queue
             await self.queue_links(cur, self.graph[cur], depth, is_source)
 
     def find_path(self, parents, dest):
