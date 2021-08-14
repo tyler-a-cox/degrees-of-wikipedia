@@ -1,6 +1,6 @@
 import sys
 import asyncio
-from graph import Graph
+from wikiracer.graph import Graph
 
 # initialize graph
 racer = Graph()

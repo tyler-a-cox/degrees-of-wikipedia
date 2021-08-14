@@ -1,6 +1,6 @@
 import aiohttp
 import asyncio
-from query import request
+from .query import request
 
 
 class Session:

@@ -1,6 +1,6 @@
 from queue import Queue
-from query import request
-from fetch import Session
+from .query import request
+from .fetch import Session
 
 
 class Graph:
