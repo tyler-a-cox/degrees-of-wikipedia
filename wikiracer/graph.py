@@ -4,7 +4,7 @@ import logging
 from queue import Queue
 from .query import request
 from .fetch import Session
-from .utils import save_graph
+from .utils import save_graph, print_path
 
 
 class Graph:
@@ -65,7 +65,15 @@ class Graph:
         logger.info("No path found")
         sys.exit(0)
 
-    async def bfs(self, to_visit, came_from, dest_cf, is_source):
+    async def bfs(
+        self,
+        to_visit,
+        came_from,
+        dest_cf,
+        is_source,
+        print_output=True,
+        store_output=False,
+    ):
         """
 
         Args:
@@ -79,7 +87,6 @@ class Graph:
         # if current topic is found in the opposing topic's visited,
         # then path exists and must be traced back on both sides to return
         if cur in dest_cf:
-            print(is_source)
             path1 = self.find_path(came_from, cur)
             path2 = self.find_path(dest_cf, cur)
 
@@ -87,16 +94,21 @@ class Graph:
                 path1.reverse()
                 path1.pop()
                 path1.extend(path2)
-                print(path1)
-                save_graph(self.graph)
-                self.logger.info(path1)
+                if print_output:
+                    print_path(path1)
+
+                if store_output:
+                    save_graph(self.graph)
+
             else:
                 path2.reverse()
                 path2.pop()
                 path2.extend(path1)
-                print(path2)
-                save_graph(self.graph)
-                self.logger.info(path2)
+                if print_output:
+                    print_path(path2)
+
+                if store_output:
+                    save_graph(self.graph)
 
             sys.exit(0)
 

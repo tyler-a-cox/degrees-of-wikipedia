@@ -8,7 +8,7 @@ from .exceptions import RequestException
 
 RANDOM_URL = "https://en.wikipedia.org/wiki/Special:Random"
 BASE_URL = "https://en.wikipedia.org/w/api.php?"
-WIKI_URL = "https://en.wikipedia/wiki/"
+WIKI_URL = "https://en.wikipedia.org/wiki/"
 
 regex = re.compile(
     r"^(?:http|ftp)s?://"  # http:// or https://

@@ -1,5 +1,7 @@
 # Six Degrees of Separation - Wikipedia
 
+![Example Gif](assets/wikiracer_demo.gif)
+
 ## Installation
 ```
 git clone https://github.com/tyler-a-cox/degrees-of-wikipedia
