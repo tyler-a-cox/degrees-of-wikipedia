@@ -1,5 +1,6 @@
 import sys
 import asyncio
+import logging
 from queue import Queue
 from .query import request
 from .fetch import Session
@@ -11,20 +12,31 @@ class Graph:
     """
 
     def __init__(self, is_source: bool = True):
+        """
+        Args:
+            is_source: bool
+        """
         self.graph = {}
         self.worker = Session()
         self.to_visit_start = asyncio.Queue()
         self.to_visit_end = asyncio.Queue()
         self.came_from_start = {}
         self.came_from_end = {}
+        self.logger = logging.getLogger()
 
     async def shortest_path(self, start, end):
         """
         A breadth-first search for a path between a start and end topic.
+
+        Args:
+            start
+            end
+
+        Returns:
+            None
         """
-        # if start and end are the same, finish fast
         if start == end:
-            print([start])
+            logger.info([start])
             sys.exit(0)
 
         # initialize came_from with start node to trace back
@@ -49,10 +61,18 @@ class Graph:
                 is_source=False,
             )
 
-        print("No path found")
+        logger.info("No path found")
         sys.exit(0)
 
     async def bfs(self, to_visit, came_from, dest_cf, is_source):
+        """
+
+        Args:
+            to_visit
+            came_from
+            dest_cf
+            is_source
+        """
         cur, depth = await to_visit.get()
 
         # if current topic is found in the opposing topic's visited,
@@ -65,19 +85,18 @@ class Graph:
                 path1.reverse()
                 path1.pop()
                 path1.extend(path2)
-                print(path1)
+                logger.info(path1)
             else:
                 path2.reverse()
                 path2.pop()
                 path2.extend(path1)
-                print(path2)
+                logger.info(path2)
 
-            # print(path1)
             sys.exit(0)
 
         # condition set to not exceed 20 depths of search
         if depth == 20:
-            print("Path not found")
+            logger.info("Path not found")
             sys.exit(0)
 
         if cur not in self.graph:
@@ -88,6 +107,13 @@ class Graph:
     def find_path(self, parents, dest):
         """
         Traces path from current node to parent.
+
+        Args:
+            parents:
+            dest:
+
+        Returns:
+            path
         """
         path = [dest]
         while parents[dest] is not None:
@@ -100,6 +126,15 @@ class Graph:
         """
         Adds node's children to to_visit queue for bfs.
         Callback that is fired after worker retrieves wiki_request.
+
+        Args:
+            cur:
+            resp:
+            depth:
+            is_source:
+
+        Returns:
+
         """
         if is_source:
             to_visit = self.to_visit_start
