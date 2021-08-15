@@ -4,6 +4,7 @@ import logging
 import asyncio
 import aiohttp
 import wikipedia
+from .exceptions import RequestException
 
 RANDOM_URL = "https://en.wikipedia.org/wiki/Special:Random"
 BASE_URL = "https://en.wikipedia.org/w/api.php?"
@@ -44,7 +45,7 @@ def is_valid_url(url: str) -> bool:
     return match is not None
 
 
-async def request(session: aiohttp.ClientSession, topic: str, is_source):
+async def request(session, topic, is_source):
     """
     Sends wiki request to obtain links for a topic.
     Due to a 500 link limit, additional requests must be sent based on the
@@ -59,42 +60,34 @@ async def request(session: aiohttp.ClientSession, topic: str, is_source):
         titles: list
     """
 
-    cont = True
+    cont = None
     titles = []
 
-    while cont:
+    while cont != "DONE":
         if is_source:
             body = await _get_links(session, topic, cont)
             cont_type = "plcontinue"
         else:
-            body = await _get_links(session, topic, cont, prop="linkshere")
+            body = await _get_linkshere(session, topic, cont)
             cont_type = "lhcontinue"
 
         _get_titles(body, titles, cont_type)
         try:
             cont = body["continue"][cont_type]
         except KeyError:
-            cont = False
+            cont = "DONE"
 
     return titles
 
 
-async def _get_links(session, topic, cont, prop="links"):
+async def _get_links(session, topic, cont):
     """
-    Helper function for a single wikipedia page request
-
-    Args:
-        session:
-        topic:
-        cont:
-
-    Returns:
-        pass
+    Helper function for single wiki request.
     """
     payload = {
         "action": "query",
         "titles": topic,
-        "prop": prop,
+        "prop": "links",
         "format": "json",
         "pllimit": "500",
     }
@@ -110,6 +103,69 @@ async def _get_links(session, topic, cont, prop="links"):
         else:
             print(resp.status)
             sys.exit(1)
+
+
+async def _get_linkshere(session, topic, cont):
+    """
+    Helper function for single wiki request.
+    """
+    payload = {
+        "action": "query",
+        "titles": topic,
+        "prop": "linkshere",
+        "format": "json",
+        "lhlimit": "500",
+    }
+
+    if cont:
+        payload["lhcontinue"] = cont
+
+    # using 'with' closes the session
+    async with session.get(BASE_URL, params=payload) as resp:
+        # check to see if response is OK
+        if resp.status // 100 == 2:
+            return await resp.json()
+        else:
+            print(resp.status)
+            sys.exit(1)
+
+
+"""
+async def _get_links(session, topic, cont, prop="links"):
+
+    Helper function for a single wikipedia page request
+
+    Args:
+        session:
+        topic:
+        cont:
+
+    Returns:
+        pass
+
+    payload = {
+        "action": "query",
+        "titles": topic,
+        "prop": prop,
+        "format": "json",
+        "pllimit": "500",
+    }
+
+    if cont and prop == "links":
+        payload["plcontinue"] = cont
+
+    elif cont and prop == "linkshere":
+        payload["lhcontinue"] = cont
+
+    # using 'with' closes the session
+    async with session.get(BASE_URL, params=payload) as resp:
+        # check to see if response is OK
+        if resp.status // 100 == 2:
+            return await resp.json()
+        else:
+            print(resp.status)
+            sys.exit(1)
+"""
 
 
 def _get_titles(body, titles, cont_type):

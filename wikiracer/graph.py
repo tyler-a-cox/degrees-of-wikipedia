@@ -4,6 +4,7 @@ import logging
 from queue import Queue
 from .query import request
 from .fetch import Session
+from .utils import save_graph
 
 
 class Graph:
@@ -78,6 +79,7 @@ class Graph:
         # if current topic is found in the opposing topic's visited,
         # then path exists and must be traced back on both sides to return
         if cur in dest_cf:
+            print(is_source)
             path1 = self.find_path(came_from, cur)
             path2 = self.find_path(dest_cf, cur)
 
@@ -85,12 +87,16 @@ class Graph:
                 path1.reverse()
                 path1.pop()
                 path1.extend(path2)
-                logger.info(path1)
+                print(path1)
+                save_graph(self.graph)
+                self.logger.info(path1)
             else:
                 path2.reverse()
                 path2.pop()
                 path2.extend(path1)
-                logger.info(path2)
+                print(path2)
+                save_graph(self.graph)
+                self.logger.info(path2)
 
             sys.exit(0)
 
@@ -101,6 +107,7 @@ class Graph:
 
         if cur not in self.graph:
             await self.worker.producer(cur, self.queue_links, depth, is_source)
+
         else:
             await self.queue_links(cur, self.graph[cur], depth, is_source)
 
