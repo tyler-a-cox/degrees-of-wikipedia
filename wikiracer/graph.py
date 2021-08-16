@@ -3,8 +3,10 @@ import asyncio
 import logging
 import aiologger
 from queue import Queue
-from .query import request
+from wikipedia2vec import Wikipedia2Vec
+
 from .fetch import Session
+from .query import request, request_sync
 from .utils import save_graph, print_path
 from .exceptions import MaxDepthReachedException
 
@@ -172,3 +174,68 @@ class Graph:
                 continue
             came_from[link] = cur
             await to_visit.put((link, depth + 1))
+
+
+class ContextSearch:
+    """
+    """
+
+    def __init__(self, model_path="enwiki_2018420_100d.pkl"):
+        """
+        """
+        self.model = Wikipedia2Vec.load(model_path)
+        self.session = request.Session()
+        self.DEPTH = 50
+
+    def return_vector(self, word):
+        """
+        """
+        try:
+            eword = model.get_word_vector(end)
+
+        except:
+            eword = model.get_entity_vector(end)
+
+    def cosine_similarity(sr):
+        """
+        """
+        arrays = []
+        words = []
+        for stitle in sr:
+            try:
+                sword = self.return_vector(stitle)
+
+            except KeyError:
+                continue
+
+            arrays.append(sword)
+            words.append(stitle)
+
+        arrays = np.array(arrays)
+        total = (
+            np.nansum(arrays * eword, axis=1)
+            / np.linalg.norm(arrays, axis=1)
+            / np.linalg.norm(eword)
+        )
+        start = words[np.argmax(total)]
+        return start
+
+    def trace(start, end):
+        """
+        """
+        sr = request_sync(self.session, start, True)
+        count = 0
+        try:
+            eword = self.return_vector(end)
+
+        except KeyError:
+            return "Word not in corpus"
+
+        path = [start]
+        while start != end and count < self.DEPTH:
+            start = self.cosine_similarity(sr)
+            count += 1
+            sr = request_sync(self.session, start, True)
+            path.append(start)
+
+        return path
