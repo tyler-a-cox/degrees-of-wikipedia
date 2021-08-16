@@ -4,7 +4,7 @@
 
 from setuptools import setup, find_packages
 
-requirements = ["asyncio", "aiohttp", "numpy"]
+requirements = ["asyncio", "aiohttp", "aiologger", "numpy"]
 test_requirements = requirements
 
 setup(

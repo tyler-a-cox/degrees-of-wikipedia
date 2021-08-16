@@ -1,10 +1,12 @@
 import sys
 import asyncio
 import logging
+import aiologger
 from queue import Queue
 from .query import request
 from .fetch import Session
 from .utils import save_graph, print_path
+from .exceptions import MaxDepthReachedException
 
 
 class Graph:
@@ -12,7 +14,7 @@ class Graph:
     A Wikipedia page and its outlinks stored as a graph.
     """
 
-    def __init__(self, is_source: bool = True):
+    def __init__(self, is_source: bool = True, max_depth: int = 20):
         """
         Args:
             is_source: bool
@@ -23,7 +25,8 @@ class Graph:
         self.to_visit_end = asyncio.Queue()
         self.came_from_start = {}
         self.came_from_end = {}
-        self.logger = logging.getLogger()
+        self.logger = aiologger.Logger.with_default_handlers()
+        self.max_depth = max_depth
 
     async def shortest_path(self, start, end):
         """
@@ -113,9 +116,10 @@ class Graph:
             sys.exit(0)
 
         # condition set to not exceed 20 depths of search
-        if depth == 20:
-            logger.info("Path not found")
-            sys.exit(0)
+        if depth == self.max_depth:
+            raise MaxDepthReachedException(
+                "Max depth of {} reached".format(self.max_depth)
+            )
 
         if cur not in self.graph:
             await self.worker.producer(cur, self.queue_links, depth, is_source)
